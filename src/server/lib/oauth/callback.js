@@ -63,8 +63,9 @@ export default async (req, provider, csrfToken, callback) => {
           logger.error('OAUTH_GET_ACCESS_TOKEN_ERROR', error, results, provider.id, code)
           return callback(error || results.error)
         }
-
+        logger.error('OAUTH_provider', provider)
         if (provider.idToken) {
+          logger.error('idToken',{})
           // If we don't have an ID Token most likely the user hit a cancel
           // button when signing in (or the provider is misconfigured).
           //
@@ -233,7 +234,7 @@ async function _getOAuthAccessToken (code, provider, callback) {
         logger.error('OAUTH_GET_ACCESS_TOKEN_ERROR', error, data, response)
         return callback(error)
       }
-
+      logger.error('OAUTH_RESULTS', data)
       let results
       try {
         // As of http://tools.ietf.org/html/draft-ietf-oauth-v2-07
