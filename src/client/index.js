@@ -226,7 +226,7 @@ const signIn = async (provider, args = {}) => {
   const baseUrl = _apiBaseUrl()
   const callbackUrl = (args && args.callbackUrl) ? args.callbackUrl : window.location
   const providers = await getProviders()
-
+  logger.warn('NEXT-AUTH-RAS VERSIIONE', process.env.version, "3.1.7")
   // Redirect to sign in page if no valid provider specified
   if (!provider || !providers[provider]) {
     // If Provider not recognized, redirect to sign in page

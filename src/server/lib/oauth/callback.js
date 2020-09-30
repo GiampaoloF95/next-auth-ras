@@ -17,6 +17,7 @@ export default async (req, provider, csrfToken, callback) => {
   // The "user" object is specific to apple provider and is provided on first sign in
   // e.g. {"name":{"firstName":"Johnny","lastName":"Appleseed"},"email":"johnny.appleseed@nextauth.com"}
   let { oauth_token, oauth_verifier, code, user, state } = req.query // eslint-disable-line camelcase
+  logger.error('CHECK_PROVIDER', provider, csrfToken)
   const client = oAuthClient(provider)
 
   if (provider.version && provider.version.startsWith('2.')) {
@@ -90,7 +91,7 @@ export default async (req, provider, csrfToken, callback) => {
         } else {
           // Use custom get() method for oAuth2 flows
           client.get = _get
-
+          logger.error('_getProfile',accessToken, refreshToken, provider)
           client.get(
             provider,
             accessToken,
@@ -222,7 +223,7 @@ async function _getOAuthAccessToken (code, provider, callback) {
   }
 
   const postData = querystring.stringify(params)
-  
+  logger.error('_getOAuthAccessToken', {provider: provider, header: headers})
   this._request(
     'POST',
     url,
@@ -266,6 +267,7 @@ function _get (provider, accessToken, callback) {
       headers.Authorization = provider.headers?.Authorization
     }
     else{
+      logger.warn("NO_BASIC_AUTH", {Bearer: accessToken, buildAuth: this.buildAuthHeader(accessToken), provider: provider})
       headers.Authorization = this.buildAuthHeader(accessToken)
     }
 
