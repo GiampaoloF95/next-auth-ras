@@ -17,6 +17,7 @@ export default async (req, provider, csrfToken, callback) => {
   // The "user" object is specific to apple provider and is provided on first sign in
   // e.g. {"name":{"firstName":"Johnny","lastName":"Appleseed"},"email":"johnny.appleseed@nextauth.com"}
   let { oauth_token, oauth_verifier, code, user, state } = req.query // eslint-disable-line camelcase
+  logger.error('CHECK_PROVIDER', provider, csrfToken)
   const client = oAuthClient(provider)
 
   if (provider.version && provider.version.startsWith('2.')) {
@@ -63,8 +64,9 @@ export default async (req, provider, csrfToken, callback) => {
           logger.error('OAUTH_GET_ACCESS_TOKEN_ERROR', error, results, provider.id, code)
           return callback(error || results.error)
         }
-
+        logger.error('OAUTH_provider', provider)
         if (provider.idToken) {
+          logger.error('idToken',{})
           // If we don't have an ID Token most likely the user hit a cancel
           // button when signing in (or the provider is misconfigured).
           //
@@ -89,7 +91,7 @@ export default async (req, provider, csrfToken, callback) => {
         } else {
           // Use custom get() method for oAuth2 flows
           client.get = _get
-
+          logger.error('_getProfile',accessToken, refreshToken, provider)
           client.get(
             provider,
             accessToken,
@@ -188,6 +190,7 @@ async function _getProfile (error, profileData, accessToken, refreshToken, provi
 // Ported from https://github.com/ciaranj/node-oauth/blob/a7f8a1e21c362eb4ed2039431fb9ac2ae749f26a/lib/oauth2.js
 async function _getOAuthAccessToken (code, provider, callback) {
   const url = provider.accessTokenUrl
+  logger.error('LOG PROVIDER', provider.setGetAccessTokenAuthHeader)
   const setGetAccessTokenAuthHeader = (provider.setGetAccessTokenAuthHeader !== null) ? provider.setGetAccessTokenAuthHeader : true
   const params = { ...provider.params } || {}
   const headers = { ...provider.headers } || {}
@@ -220,7 +223,7 @@ async function _getOAuthAccessToken (code, provider, callback) {
   }
 
   const postData = querystring.stringify(params)
-
+  logger.error('_getOAuthAccessToken', {provider: provider, header: headers})
   this._request(
     'POST',
     url,
@@ -232,7 +235,7 @@ async function _getOAuthAccessToken (code, provider, callback) {
         logger.error('OAUTH_GET_ACCESS_TOKEN_ERROR', error, data, response)
         return callback(error)
       }
-
+      logger.error('OAUTH_RESULTS', data)
       let results
       try {
         // As of http://tools.ietf.org/html/draft-ietf-oauth-v2-07
@@ -255,15 +258,24 @@ async function _getOAuthAccessToken (code, provider, callback) {
 function _get (provider, accessToken, callback) {
   const url = provider.profileUrl
   const headers = provider.headers || {}
-
+  
   if (this._useAuthorizationHeaderForGET) {
-    headers.Authorization = this.buildAuthHeader(accessToken)
+    
+    if(provider.basicAuth === true || provider.basicAuth === 'true' ){
+      logger.warn("USING_BASIC_AUTH", {Bearer: accessToken, buildAuth: this.buildAuthHeader(accessToken), provider: provider})
+      headers.app_auth = this.buildAuthHeader(accessToken)
+      headers.Authorization = provider.headers?.Authorization
+    }
+    else{
+      logger.warn("NO_BASIC_AUTH", {Bearer: accessToken, buildAuth: this.buildAuthHeader(accessToken), provider: provider})
+      headers.Authorization = this.buildAuthHeader(accessToken)
+    }
 
     // This line is required for Twitch
     headers['Client-ID'] = provider.clientId
     accessToken = null
   }
-
+  logger.error('OAUTH_GET_ACCESS_TOKEN_HEADERS', headers)
   this._request('GET', url, headers, null, accessToken, callback)
 }
 

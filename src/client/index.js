@@ -111,7 +111,7 @@ const getSession = async ({ req, ctx, triggerEvent = true } = {}) => {
   if (!req && ctx && ctx.req) { req = ctx.req }
 
   const baseUrl = _apiBaseUrl()
-  const fetchOptions = req ? { headers: { cookie: req.headers.cookie } } : {}
+  const fetchOptions = req ? { headers: { cookie: req.headers.cookie, Authorization: req.headers.Authorization || req.headers.authorization } } : {}
   const session = await _fetchData(`${baseUrl}/session`, fetchOptions)
   if (triggerEvent) {
     _sendMessage({ event: 'session', data: { trigger: 'getSession' } })
@@ -127,7 +127,7 @@ const getCsrfToken = async ({ req, ctx } = {}) => {
   if (!req && ctx && ctx.req) { req = ctx.req }
 
   const baseUrl = _apiBaseUrl()
-  const fetchOptions = req ? { headers: { cookie: req.headers.cookie } } : {}
+  const fetchOptions = req ? { headers: { cookie: req.headers.cookie, Authorization: req.headers.Authorization || req.headers.authorization } } : {}
   const data = await _fetchData(`${baseUrl}/csrf`, fetchOptions)
   return data && data.csrfToken ? data.csrfToken : null
 }
@@ -226,7 +226,7 @@ const signIn = async (provider, args = {}) => {
   const baseUrl = _apiBaseUrl()
   const callbackUrl = (args && args.callbackUrl) ? args.callbackUrl : window.location
   const providers = await getProviders()
-
+  logger.warn('NEXT-AUTH-RAS VERSIIONE', process.env.version, "3.1.7")
   // Redirect to sign in page if no valid provider specified
   if (!provider || !providers[provider]) {
     // If Provider not recognized, redirect to sign in page
@@ -240,7 +240,8 @@ const signIn = async (provider, args = {}) => {
     const fetchOptions = {
       method: 'post',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/x-www-form-urlencoded',
+        ...((providers[provider] && providers[provider]?.headers?.Authorization) && {Authorization: providers[provider]?.headers?.Authorization})
       },
       body: _encodedForm({
         ...args,
@@ -285,6 +286,7 @@ const Provider = ({ children, session, options }) => {
 
 const _fetchData = async (url, options = {}) => {
   try {
+    logger.warn("FETCH_CLIENT_OPTIONS", {options: options, url: url})
     const res = await fetch(url, options)
     const data = await res.json()
     return Promise.resolve(Object.keys(data).length > 0 ? data : null) // Return null if data empty
