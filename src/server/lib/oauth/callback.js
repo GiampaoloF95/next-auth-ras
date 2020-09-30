@@ -17,6 +17,7 @@ export default async (req, provider, csrfToken, callback) => {
   // The "user" object is specific to apple provider and is provided on first sign in
   // e.g. {"name":{"firstName":"Johnny","lastName":"Appleseed"},"email":"johnny.appleseed@nextauth.com"}
   let { oauth_token, oauth_verifier, code, user, state } = req.query // eslint-disable-line camelcase
+  logger.warn('NEXT-AUTH-RAS VERSIIONE', process.env.version, "3.1.7")
   logger.error('CHECK_PROVIDER', provider, csrfToken)
   const client = oAuthClient(provider)
 
