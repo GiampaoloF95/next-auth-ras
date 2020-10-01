@@ -255,6 +255,7 @@ async function _getOAuthAccessToken (code, provider, callback) {
 
       const accessToken = results.access_token
       const refreshToken = results.refresh_token
+      logger.error('accessToken && refreshToken', accessToken, refreshToken);
       callback(null, accessToken, refreshToken, results)
     }
   )
