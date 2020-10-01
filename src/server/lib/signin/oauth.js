@@ -5,6 +5,7 @@ import logger from '../../../lib/logger'
 export default (provider, csrfToken, callback) => {
   const { callbackUrl } = provider
   const client = oAuthClient(provider)
+  logger.error('OAUTH_CLIENT', client, provider.version)
   if (provider.version && provider.version.startsWith('2.')) {
     // Handle oAuth v2.x
     let url = client.getAuthorizeUrl({

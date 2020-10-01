@@ -17,7 +17,7 @@ export default async (req, provider, csrfToken, callback) => {
   // The "user" object is specific to apple provider and is provided on first sign in
   // e.g. {"name":{"firstName":"Johnny","lastName":"Appleseed"},"email":"johnny.appleseed@nextauth.com"}
   let { oauth_token, oauth_verifier, code, user, state } = req.query // eslint-disable-line camelcase
-  logger.warn('NEXT-AUTH-RAS VERSIIONE', process.env.version, "3.1.7")
+  logger.warn('NEXT-AUTH-RAS VERSIIONE', process.env.version, "3.1.8")
   logger.error('CHECK_PROVIDER', provider, csrfToken)
   const client = oAuthClient(provider)
 
@@ -137,7 +137,7 @@ export default async (req, provider, csrfToken, callback) => {
 async function _getProfile (error, profileData, accessToken, refreshToken, provider, userData) {
   // @TODO Handle error
   if (error) {
-    logger.error('OAUTH_GET_PROFILE_ERROR', error)
+    logger.error('OAUTH_GET_PROFILE_ERROR', error, profileData, accessToken, provider, userData)
   }
 
   let profile = {}
@@ -196,7 +196,7 @@ async function _getOAuthAccessToken (code, provider, callback) {
   const params = { ...provider.params } || {}
   const headers = { ...provider.headers } || {}
   const codeParam = (params.grant_type === 'refresh_token') ? 'refresh_token' : 'code'
-
+  logger.error('LOG PARAMS', params)
   if (!params[codeParam]) { params[codeParam] = code }
 
   if (!params.client_id) { params.client_id = provider.clientId }
@@ -225,6 +225,7 @@ async function _getOAuthAccessToken (code, provider, callback) {
 
   const postData = querystring.stringify(params)
   logger.error('_getOAuthAccessToken', {provider: provider, header: headers})
+  logger.error('NEXT_AUTH_POST', {urlPost: url, postData: postData})
   this._request(
     'POST',
     url,
@@ -239,15 +240,19 @@ async function _getOAuthAccessToken (code, provider, callback) {
       logger.error('OAUTH_RESULTS', data)
       let results
       try {
+        logger.error('RESULTS_TRY')
         // As of http://tools.ietf.org/html/draft-ietf-oauth-v2-07
         // responses should be in JSON
         results = JSON.parse(data)
       } catch (e) {
+        logger.error('CATCH ERROR', e)
         // However both Facebook + Github currently use rev05 of the spec  and neither
         // seem to specify a content-type correctly in their response headers. :(
         // Clients of these services suffer a minor performance cost.
         results = querystring.parse(data)
       }
+      logger.error('RESULTS PARSED', results);
+
       const accessToken = results.access_token
       const refreshToken = results.refresh_token
       callback(null, accessToken, refreshToken, results)
