@@ -111,7 +111,7 @@ const getSession = async ({ req, ctx, triggerEvent = true } = {}) => {
   if (!req && ctx && ctx.req) { req = ctx.req }
 
   const baseUrl = _apiBaseUrl()
-  const fetchOptions = req ? { headers: { cookie: req.headers.cookie, Authorization: req.headers.Authorization || req.headers.authorization } } : {}
+  const fetchOptions = req ? { headers: { cookie: req.headers.cookie, authorization: req.headers.authorization } } : {}
   const session = await _fetchData(`${baseUrl}/session`, fetchOptions)
   if (triggerEvent) {
     _sendMessage({ event: 'session', data: { trigger: 'getSession' } })
@@ -127,7 +127,7 @@ const getCsrfToken = async ({ req, ctx } = {}) => {
   if (!req && ctx && ctx.req) { req = ctx.req }
 
   const baseUrl = _apiBaseUrl()
-  const fetchOptions = req ? { headers: { cookie: req.headers.cookie, Authorization: req.headers.Authorization || req.headers.authorization } } : {}
+  const fetchOptions = req ? { headers: { cookie: req.headers.cookie, authorization: req.headers.authorization } } : {}
   const data = await _fetchData(`${baseUrl}/csrf`, fetchOptions)
   return data && data.csrfToken ? data.csrfToken : null
 }
