@@ -17,8 +17,8 @@ export default async (req, provider, csrfToken, callback) => {
   // The "user" object is specific to apple provider and is provided on first sign in
   // e.g. {"name":{"firstName":"Johnny","lastName":"Appleseed"},"email":"johnny.appleseed@nextauth.com"}
   let { oauth_token, oauth_verifier, code, user, state } = req.query // eslint-disable-line camelcase
-  logger.warn('NEXT-AUTH-RAS VERSIIONE', process.env.version, "3.1.8")
-  logger.error('CHECK_PROVIDER', provider, csrfToken)
+/*   logger.warn('NEXT-AUTH-RAS VERSIIONE', process.env.version, "3.1.8") */
+/*   logger.error('CHECK_PROVIDER', provider, csrfToken) */
   const client = oAuthClient(provider)
 
   if (provider.version && provider.version.startsWith('2.')) {
@@ -65,7 +65,7 @@ export default async (req, provider, csrfToken, callback) => {
           logger.error('OAUTH_GET_ACCESS_TOKEN_ERROR', error, results, provider.id, code)
           return callback(error || results.error)
         }
-        logger.error('OAUTH_provider', provider)
+        /* logger.error('OAUTH_provider', provider) */
         if (provider.idToken) {
           logger.error('idToken',{})
           // If we don't have an ID Token most likely the user hit a cancel
@@ -92,7 +92,7 @@ export default async (req, provider, csrfToken, callback) => {
         } else {
           // Use custom get() method for oAuth2 flows
           client.get = _get
-          logger.error('_getProfile',accessToken, refreshToken, provider)
+          /* logger.error('_getProfile',accessToken, refreshToken, provider) */
           client.get(
             provider,
             accessToken,
@@ -150,7 +150,7 @@ async function _getProfile (error, profileData, accessToken, refreshToken, provi
       profileData.user = userData
     }
 
-    logger.debug('PROFILE_DATA', profileData)
+    /* logger.debug('PROFILE_DATA', profileData) */
 
     profile = await provider.profile(profileData)
   } catch (exception) {
@@ -191,12 +191,12 @@ async function _getProfile (error, profileData, accessToken, refreshToken, provi
 // Ported from https://github.com/ciaranj/node-oauth/blob/a7f8a1e21c362eb4ed2039431fb9ac2ae749f26a/lib/oauth2.js
 async function _getOAuthAccessToken (code, provider, callback) {
   const url = provider.accessTokenUrl
-  logger.error('LOG PROVIDER', provider.setGetAccessTokenAuthHeader)
+  /* logger.error('LOG PROVIDER', provider.setGetAccessTokenAuthHeader) */
   const setGetAccessTokenAuthHeader = (provider.setGetAccessTokenAuthHeader !== null) ? provider.setGetAccessTokenAuthHeader : true
   const params = { ...provider.params } || {}
   const headers = { ...provider.headers } || {}
   const codeParam = (params.grant_type === 'refresh_token') ? 'refresh_token' : 'code'
-  logger.error('LOG PARAMS', params)
+  /* logger.error('LOG PARAMS', params) */
   if (!params[codeParam]) { params[codeParam] = code }
 
   if (!params.client_id) { params.client_id = provider.clientId }
@@ -224,8 +224,8 @@ async function _getOAuthAccessToken (code, provider, callback) {
   }
 
   const postData = querystring.stringify(params)
-  logger.error('_getOAuthAccessToken', {provider: provider, header: headers})
-  logger.error('NEXT_AUTH_POST', {urlPost: url, postData: postData})
+  /* logger.error('_getOAuthAccessToken', {provider: provider, header: headers})
+  logger.error('NEXT_AUTH_POST', {urlPost: url, postData: postData}) */
   this._request(
     'POST',
     url,
@@ -251,7 +251,7 @@ async function _getOAuthAccessToken (code, provider, callback) {
         // Clients of these services suffer a minor performance cost.
         results = querystring.parse(data)
       }
-      logger.error('RESULTS PARSED', results);
+      /* logger.error('RESULTS PARSED', results); */
 
       const accessToken = results.access_token
       const refreshToken = results.refresh_token
@@ -269,12 +269,12 @@ function _get (provider, accessToken, callback) {
   if (this._useAuthorizationHeaderForGET) {
     
     if(provider.basicAuth === true || provider.basicAuth === 'true' ){
-      logger.warn("USING_BASIC_AUTH", {Bearer: accessToken, buildAuth: this.buildAuthHeader(accessToken), provider: provider})
+      /* logger.warn("USING_BASIC_AUTH", {Bearer: accessToken, buildAuth: this.buildAuthHeader(accessToken), provider: provider}) */
       headers.appAuth = this.buildAuthHeader(accessToken)
       headers.Authorization = provider.headers?.Authorization
     }
     else{
-      logger.warn("NO_BASIC_AUTH", {Bearer: accessToken, buildAuth: this.buildAuthHeader(accessToken), provider: provider})
+      /* logger.warn("NO_BASIC_AUTH", {Bearer: accessToken, buildAuth: this.buildAuthHeader(accessToken), provider: provider}) */
       headers.Authorization = this.buildAuthHeader(accessToken)
     }
 
@@ -282,7 +282,7 @@ function _get (provider, accessToken, callback) {
     headers['Client-ID'] = provider.clientId
     accessToken = null
   }
-  logger.error('OAUTH_GET_ACCESS_TOKEN_HEADERS', headers)
+  /* logger.error('OAUTH_GET_ACCESS_TOKEN_HEADERS', headers) */
   this._request('GET', url, headers, null, accessToken, callback)
 }
 
