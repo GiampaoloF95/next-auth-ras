@@ -62,7 +62,7 @@ export default async (req, provider, csrfToken, callback) => {
       provider,
       (error, accessToken, refreshToken, results) => {
         if (error || results.error) {
-          logger.error('OAUTH_GET_ACCESS_TOKEN_ERROR', error, results, provider.id, code)
+          logger.error('OAUTH_GET_ACCESS_TOKEN_ERROR 1', error, results, provider.id, code)
           return callback(error || results.error)
         }
         /* logger.error('OAUTH_provider', provider) */
@@ -234,7 +234,8 @@ async function _getOAuthAccessToken (code, provider, callback) {
     null,
     (error, data, response) => {
       if (error) {
-        logger.error('OAUTH_GET_ACCESS_TOKEN_ERROR', error, data, response)
+        logger.error('OAUTH_GET_ACCESS_TOKEN_ERROR 2', url, headers, postData)
+        logger.error('OAUTH_GET_ACCESS_TOKEN_ERROR 3', error, data, response)
         return callback(error)
       }
       logger.error('OAUTH_RESULTS', data)
