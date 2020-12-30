@@ -193,6 +193,7 @@ async function _getOAuthAccessToken (code, provider, callback) {
   const url = provider.accessTokenUrl
   /* logger.error('LOG PROVIDER', provider.setGetAccessTokenAuthHeader) */
   const setGetAccessTokenAuthHeader = (provider.setGetAccessTokenAuthHeader !== null) ? provider.setGetAccessTokenAuthHeader : true
+
   const params = { ...provider.params } || {}
   const headers = { ...provider.headers } || {}
   const codeParam = (params.grant_type === 'refresh_token') ? 'refresh_token' : 'code'
@@ -219,10 +220,11 @@ async function _getOAuthAccessToken (code, provider, callback) {
   if (!headers['Client-ID']) { headers['Client-ID'] = provider.clientId }
 
   // Okta errors when this is set. Maybe there are other Providers that also wont like this.
+  logger.error('HEADERS BEFORE', headers);
   if (setGetAccessTokenAuthHeader) {
     if (!headers.Authorization) { headers.Authorization = `Bearer ${code}` }
   }
-
+  logger.error('HEADERS AFTER', headers);
   const postData = querystring.stringify(params)
   /* logger.error('_getOAuthAccessToken', {provider: provider, header: headers})
   logger.error('NEXT_AUTH_POST', {urlPost: url, postData: postData}) */
