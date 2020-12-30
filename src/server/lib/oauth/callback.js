@@ -228,8 +228,8 @@ async function _getOAuthAccessToken (code, provider, callback) {
   if (setGetAccessTokenAuthHeader) {
     if (!headers.Authorization) { headers.Authorization = `Bearer ${code}` }
   }
-  else if(basicAuth && typeof basicAuth === "string"){
-    headers.Authorization = basicAuth
+  else if(provider && provider.basicAuth && typeof provider.basicAuth === "string"){
+    headers.Authorization = provider.basicAuth
   }
   logger.error('HEADERS AFTER', headers);
   const postData = querystring.stringify(params)
