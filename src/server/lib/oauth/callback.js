@@ -197,9 +197,8 @@ async function _getOAuthAccessToken (code, provider, callback) {
   const params = { ...provider.params } || {}
   const headers = { ...provider.headers } || {}
   const codeParam = (params.grant_type === 'refresh_token') ? 'refresh_token' : 'code'
-  
-  logger.error('LOG PARAMS', provider.params)
-  logger.error('LOG headers', provider.headers)
+
+  logger.error('LOG PROVIDER', provider.params)
   logger.error('LOG setGetAccessTokenAuthHeader', setGetAccessTokenAuthHeader)
 
   if (!params[codeParam]) { params[codeParam] = code }
