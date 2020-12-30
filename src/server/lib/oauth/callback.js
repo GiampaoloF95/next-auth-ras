@@ -4,6 +4,7 @@ import querystring from 'querystring'
 import jwtDecode from 'jwt-decode'
 import oAuthClient from './client'
 import logger from '../../../lib/logger'
+import { type } from 'os'
 
 // @TODO Refactor monkey patching in _getOAuthAccessToken() and _get()
 // These methods have been forked from `node-oauth` to fix bugs; it may make
@@ -226,6 +227,9 @@ async function _getOAuthAccessToken (code, provider, callback) {
   logger.error('HEADERS BEFORE', headers);
   if (setGetAccessTokenAuthHeader) {
     if (!headers.Authorization) { headers.Authorization = `Bearer ${code}` }
+  }
+  else if(basicAuth && typeof basicAuth === "string"){
+    headers.Authorization = basicAuth
   }
   logger.error('HEADERS AFTER', headers);
   const postData = querystring.stringify(params)
