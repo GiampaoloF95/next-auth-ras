@@ -238,6 +238,7 @@ async function _getOAuthAccessToken (code, provider, callback) {
         logger.error('OAUTH_GET_ACCESS_TOKEN_ERROR 3', error, data, response)
         return callback(error)
       }
+      logger.error('>>>OAUTH LOGIN SUCCESSFUL', url, headers, postData)
       logger.error('OAUTH_RESULTS', data)
       let results
       try {
