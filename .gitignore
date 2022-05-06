@@ -1,5 +1,6 @@
 # Misc
 .DS_Store
+.npmrc
 
 .env
 .env.local
@@ -10,20 +11,39 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+firebase-debug.log
+.pnpm-debug.log
+
 
 # Dependencies
 node_modules
 
 # Build dirs
 .next
-/build
-/dist
-/www/build
+build
+dist
 
 # Generated files
 .docusaurus
 .cache-loader
-.next
+packages/next-auth/providers
+packages/next-auth/src/providers/oauth-types.ts
+packages/next-auth/client
+packages/next-auth/css
+packages/next-auth/lib
+packages/next-auth/core
+packages/next-auth/jwt
+packages/next-auth/react
+packages/next-auth/adapters.d.ts
+packages/next-auth/index.d.ts
+packages/next-auth/index.js
+packages/next-auth/next
+packages/next-auth/middleware.d.ts
+packages/next-auth/middleware.js
+
+# Development app
+apps/dev/src/css
+apps/dev/prisma/migrations
 
 # VS
 /.vs/slnx.sqlite-journal
@@ -31,6 +51,28 @@ node_modules
 /.vs
 .vscode
 
+# Jetbrains
+.idea
+
 # GitHub Actions runner
 /actions-runner
 /_work
+
+# DB
+dev.db*
+packages/adapter-prisma/prisma/dev.db
+packages/adapter-prisma/prisma/migrations
+db.sqlite
+
+# Tests
+coverage
+dynamodblocal-bin
+firestore-debug.log
+test.schema.gql
+
+# Turborepo
+.turbo
+
+# docusaurus
+docs/.docusaurus
+docs/providers.json

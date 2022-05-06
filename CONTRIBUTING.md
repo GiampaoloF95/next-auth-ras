@@ -8,120 +8,104 @@ Please see the [Code of Conduct](CODE_OF_CONDUCT.md) and follow any templates co
 
 Please raise any significant new functionality or breaking change an issue for discussion before raising a Pull Request for it.
 
-## Pull Requests
+## For contributors
 
-* The latest changes are always in `main` 
-* Pull Requests should be raised for larger changes
-* Pull Requests do not need approval before merging for those with contributor access (it's just helpful to have them to track changes)
-* Rebasing in Pull Requests is preferred to keep a clean commit history (see below)
-* Running `npm run lint:fix` before committing can make resolving conflicts easier, but is not required
-* Merge commits (and pushing merge commits to `main`) are disabled in this repo, but commits in PR can be squashed so this is not a blocker
-* Pushing directly to main should ideally be reserved for minor updates (e.g. correcting typos) or small single-commit fixes
+Anyone can be a contributor. Either you found a typo, or you have an awesome feature request you could implement, we encourage you to create a Pull Request.
 
-## Rebasing
+### Pull Requests
 
-*If you don't rebase and end up with merge commits in a PR then it's not a blocker, we can always squash the commits when merging!*
+- The latest changes are always in `main`, so please make your Pull Request against that branch.
+- Pull Requests should be raised for any change
+- Pull Requests need approval of a [core contributor](https://next-auth.js.org/contributors#core-team) before merging
+- We use ESLint/Prettier for linting/formatting, so please run `yarn lint:fix` before committing to make resolving conflicts easier (VSCode users, check out [this ESLint extension](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) and [this Prettier extension](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) to fix lint and formatting issues in development)
+- We encourage you to test your changes, and if you have the opportunity, please make those tests part of the Pull Request
+- If you add new functionality, please provide the corresponding documentation as well and make it part of the Pull Request
 
-If you create a branch and there are conflicting updates in the `main` branch, you can resolve them by rebasing from a check out of your branch:
+### Setting up local environment
 
-    git fetch
-    git rebase origin/main
 
-If there are any conflicts, you can resolve them and stage the files, then run:
+A quick guide on how to setup _next-auth_ locally to work on it and test out any changes:
 
-    git rebase --continue
-
-*If there are a lot of changes you may be prompted to step more than once.*
-
-When the rebase is complete (i.e. there are no more conflicts) you should push your changes to your branch before doing anything else:
-
-   git push --force-with-lease
-
-You should see that any conflicts in your PR are now resolved. You can review changes to make sure it contains changes you intended to make.
-
-*If you accidentally sync before pushing, it will trigger a merge. You can use `git merge --abort` to undo the merge.*
-
-You can use `npm run lint:fix` to automatically apply Standard JS rules to resolve formatting differences (tabs vs spaces, line endings, etc).
-
-## Setting up local environment
-
-A quick and dirty guide on how to setup *next-auth* locally to work on it and test out any changes:
 
 1. Clone the repo:
 
-       git clone git@github.com:iaincollins/next-auth.git
-       cd next-auth/
+```sh
+git clone git@github.com:nextauthjs/next-auth.git
+cd next-auth
+```
 
-2. Install packages and run the build command:
+1. Install packages. Developing requires Node.js v16:
 
-       npm i
-       npm run build
+```sh
+yarn
+```
 
-3. Link your project back to your local copy of next auth:
+3. Populate `.env.local`:
 
-       cd ../your-application
-       npm link ../next-auth
+Copy `apps/dev/.env.local.example` to `apps/dev/.env.local`, and add your env variables for each provider you want to test.
 
-4. Finally link React between the repo and the version installed in your project:
+```sh
+cd apps/dev
+cp .env.local.example .env.local
+```
 
-       cd ../next-auth
-       npm link ../your-application/node_modules/react
+> NOTE: You can add any environment variables to .env.local that you would like to use in your dev app.
+> You can find the next-auth config under`apps/dev/pages/api/auth/[...nextauth].js`.
 
-*This is an annoying step and not obvious, but is needed because of how React has been written (otherwise React crashes when you try to use the `useSession()` hook in your project).*
+4. Start the developer application/server:
 
-That's it!
+```sh
+yarn dev:app
+```
+Your developer application will be available on `http://localhost:3000`
 
-Notes: You may need to repeat both `npm link` steps if you install / update additional dependencies with `npm i`.
+That's it! 🎉
 
 If you need an example project to link to, you can use [next-auth-example](https://github.com/iaincollins/next-auth-example).
 
-### Hot reloading
+#### Hot reloading
 
-You might find it helpful to use the `npm run watch` command in the next-auth project, which will automatically (and silently) rebuild JS and CSS files as you edit them.
+When running `yarn dev:app`, you start a Next.js developer server on `http://localhost:3000`, which includes hot reloading out of the box. Make changes on any of the files in `src` and see the changes immediately.
 
-    cd next-auth/
-    npm run watch
+> NOTE: When working on CSS, you will have to manually refresh the page after changes. The reason for this is our pages using CSS are server-side rendered (using API routes). (Improving this through a PR is very welcome!)
 
-If you are working on `next-auth/src/client/index.js` hot reloading will work as normal in your Next.js app.
+> NOTE: The setup is as follows: The development application lives inside the `app` folder, and whenever you make a change to the `src` folder in the root (where next-auth is), it gets copied into `app` every time (gitignored), so Next.js can pick them up and apply hot reloading. This is to avoid some annoying issues with how symlinks are working with different React builds, and also to provide a super-fast feedback loop while developing core features.
 
-However, if you are working on anything else (e.g. `next-auth/src/server/*` etc) then you will need to *stop and start* your app for changes to apply as **Next.js will not hot reload those changes by default**. To facilitate this, you can try [this webpack plugin](https://www.npmjs.com/package/webpack-clear-require-cache-plugin). Note that the `next.config.js` syntax in the plugin README may be out of date. It should look like this:
+#### Providers
 
-```
-const clearRequireCachePlugin = require('webpack-clear-require-cache-plugin')
+If you think your custom provider might be useful to others, we encourage you to open a PR and add it to the built-in list so others can discover it much more easily! You only need to add two changes:
 
-module.exports = {
-  webpack: (config, {
-    buildId, dev, isServer, defaultLoaders, webpack,
-  }) => {
-    config.plugins.push(clearRequireCachePlugin([
-      /\.next\/server\/static\/development\/pages/,
-      /\.next\/server\/ssr-module-cache.js/,
-      /next-auth/,
-    ]))
+1. Add your config: [`src/providers/{provider}.js`](https://github.com/nextauthjs/next-auth/tree/main/src/providers) (Make sure you use a named default export, like `export default function YourProvider`!)
+2. Add provider documentation: [`www/docs/providers/{provider}.md`](https://github.com/nextauthjs/next-auth/tree/main/www/docs/providers)
 
-    return config
-  },
-}
-```
+That's it! 🎉 Others will be able to discover this provider much more easily now!
 
-### Databases
+You can look at the existing built-in providers for inspiration.
 
-Included is a Docker Compose file that starts up MySQL, Postgres, and MongoDB databases on localhost.
+#### Databases
 
-It will use port 3306, 5432, and 27017 on localhost respectively; it will not work if are running existing databases on localhost.
+If you would like to contribute to an existing database adapter or help create a new one, head over to the [nextauthjs/adapters](https://www.github.com/nextauthjs/adapters) repository and follow the instructions provided there.
 
-You can start them with `npm run db:start` and stop them with `npm run db:stop`.
+#### Testing
 
-You will need Docker installed to be able to start / stop the databases.
-
-When stopping the databases, it will reset their contents.
-
-### Testing
-
-Tests can be run with `npm run test`.
+Tests can be run with `yarn test`.
 
 Automated tests are currently crude and limited in functionality, but improvements are in development.
 
-Currently, to run tests you need to first have started local test databases (e.g. using `npm run db:start`).
+## For maintainers
 
-The databases can take a few seconds to start up, so you might need to give it a minute before running the tests.
+We use [a custom script](https://github.com/nextauthjs/next-auth/tree/main/scripts/index.ts) together with [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0) to automate releases. This makes the maintenance process easier and less error-prone. Please study the "Conventional Commits" site to understand how to write a good commit message.
+
+When accepting Pull Requests, make sure the following:
+
+- Use "Squash and merge"
+- Make sure you merge contributor PRs into `main`
+- Rewrite the commit message to conform to the `Conventional Commits` style.
+  - Using `fix` releases a patch (x.x.1)
+  - Using `feat` releases a minor (x.1.x)
+  - Using `feat` when `BREAKING CHANGE` is present in the commit messgae releases a major (1.x.x)
+- Optionally link issues the PR will resolve (You can add "close" in front of the issue numbers to close the issues automatically, when the PR is merged. `semantic-release` will also comment back to connected issues and PRs, notifying the users that a feature is added/bug fixed, etc.)
+
+### Skipping a release
+
+If a commit contains `[skip release]` in their message will be excluded from the commit analysis and won't participate in the release type determination. This is useful, if the PR being merged should not trigger a new `npm` release.
